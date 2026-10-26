@@ -1,6 +1,6 @@
-# Lead Relay
+# CRM Connector
 
-Lead Relay sits between a website form and the tools that handle the lead. A visitor submits a form, the relay checks it and stores it, pushes the person into one or more CRMs, then emails the team with the submission and where it landed. It runs on Node or as a Cloudflare Worker, has no dependencies, and is driven by one JSON config, so the same code serves any site and any CRM.
+CRM Connector sits between a website form and the tools that handle the lead. A visitor submits a form, the relay checks it and stores it, pushes the person into one or more CRMs, then emails the team with the submission and where it landed. It runs on Node or as a Cloudflare Worker, has no dependencies, and is driven by one JSON config, so the same code serves any site and any CRM.
 
 It is for anyone who wants form leads to reach a CRM without paying for a form SaaS, and without losing a lead when the CRM API is down for an hour.
 
@@ -46,14 +46,14 @@ Put it behind a reverse proxy with HTTPS and start it with `TRUST_PROXY=1`, so t
 
 ## Run it on Cloudflare Workers
 
-Copy `wrangler.example.jsonc` to `wrangler.jsonc`, create the database with `npx wrangler d1 create lead-relay`, paste its id, put the config under `vars.RELAY_CONFIG`, set each `env:` secret with `npx wrangler secret put NAME`, and run `npx wrangler deploy`. The cron trigger runs retries and the purge every five minutes. SMTP goes out through `cloudflare:sockets` on port 465 or 587.
+Copy `wrangler.example.jsonc` to `wrangler.jsonc`, create the database with `npx wrangler d1 create crm-connector`, paste its id, put the config under `vars.RELAY_CONFIG`, set each `env:` secret with `npx wrangler secret put NAME`, and run `npx wrangler deploy`. The cron trigger runs retries and the purge every five minutes. SMTP goes out through `cloudflare:sockets` on port 465 or 587.
 
 ## Connect a form
 
 Point the form at `/f/<form id>` and add the script. Without JavaScript, the same form still posts and the relay redirects to `successUrl`.
 
 ```html
-<form action="https://relay.example.com/f/contact" method="post" data-lead-relay
+<form action="https://relay.example.com/f/contact" method="post" data-crm-connector
       data-success="Thank you, we will answer within one working day.">
   <input name="first_name" required>
   <input name="email" type="email" required>
@@ -65,7 +65,7 @@ Point the form at `/f/<form id>` and add the script. Without JavaScript, the sam
 <script src="https://relay.example.com/embed.js" defer></script>
 ```
 
-The script adds the `_id`, the honeypot and the load time, sends UTM parameters, the page URL and the referrer, and fires a `lead-relay:sent` event on success. Field names are matched loosely: `firstname`, `prenom` and `vorname` all become `first_name`, and `company`, `firma` and `entreprise` become `company`. Unknown fields are kept and appear in the note and the email.
+The script adds the `_id`, the honeypot and the load time, sends UTM parameters, the page URL and the referrer, and fires a `crm-connector:sent` event on success. Field names are matched loosely: `firstname`, `prenom` and `vorname` all become `first_name`, and `company`, `firma` and `entreprise` become `company`. Unknown fields are kept and appear in the note and the email.
 
 ## Admin API
 

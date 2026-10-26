@@ -47,7 +47,7 @@ export default {
     try {
       return (await relayFor(env, ctx)).handle(request);
     } catch (e) {
-      console.error('[lead-relay]', e.message);
+      console.error('[crm-connector]', e.message);
       return new Response('{"ok":false,"error":"config"}', { status: 500, headers: { 'content-type': 'application/json' } });
     }
   },

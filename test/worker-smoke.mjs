@@ -9,7 +9,7 @@ import { startCrmMock, startSmtpMock, bodyOf } from './mocks.js';
 
 const crm = await startCrmMock();
 const smtp = await startSmtpMock();
-const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'lead-relay-worker-'));
+const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'crm-connector-worker-'));
 const port = 8799;
 const ORIGIN = 'https://site.example';
 const config = {
@@ -22,7 +22,7 @@ const config = {
   notify: { team: { transport: 'smtp', to: ['team@site.example'], from: 'forms@site.example', smtp: { host: '127.0.0.1', port: smtp.port, tls: 'off', user: 'u', pass: 'p' } } },
 };
 fs.writeFileSync(path.join(dir, 'wrangler.json'), JSON.stringify({
-  name: 'lead-relay-smoke', main: path.resolve('src/runtime/worker.js'), compatibility_date: '2025-09-01',
+  name: 'crm-connector-smoke', main: path.resolve('src/runtime/worker.js'), compatibility_date: '2025-09-01',
   d1_databases: [{ binding: 'DB', database_name: 'smoke', database_id: '00000000-0000-0000-0000-000000000000' }],
   vars: { RELAY_CONFIG: config },
 }));

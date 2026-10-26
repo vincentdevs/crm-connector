@@ -1,4 +1,4 @@
-# Lead Relay: Product Notes
+# CRM Connector: Product Notes
 
 ## The job
 

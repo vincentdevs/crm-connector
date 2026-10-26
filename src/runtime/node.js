@@ -63,7 +63,7 @@ async function toRequest(req, base) {
   return new Request(new URL(req.url, base), { method: req.method, headers, body: hasBody ? Buffer.concat(body) : undefined });
 }
 
-export async function startNode({ config, dbPath = 'lead-relay.db', port = 8787, host = '127.0.0.1', retryEveryMs = 60_000, trustProxy = false, runtime = {} } = {}) {
+export async function startNode({ config, dbPath = 'crm-connector.db', port = 8787, host = '127.0.0.1', retryEveryMs = 60_000, trustProxy = false, runtime = {} } = {}) {
   const driver = await sqliteDriver(dbPath);
   const store = sqlStore(driver);
   await store.init();
@@ -86,13 +86,13 @@ export async function startNode({ config, dbPath = 'lead-relay.db', port = 8787,
       res.writeHead(response.status, Object.fromEntries(response.headers));
       res.end(Buffer.from(await response.arrayBuffer()));
     } catch (e) {
-      console.error('[lead-relay] request failed', e);
+      console.error('[crm-connector] request failed', e);
       res.writeHead(500, { 'content-type': 'application/json' });
       res.end('{"ok":false,"error":"server"}');
     }
   });
   await new Promise((r) => server.listen(port, host, r));
-  const timer = retryEveryMs ? setInterval(() => relay.runDue().catch((e) => console.error('[lead-relay] retry pass failed', e)), retryEveryMs) : null;
+  const timer = retryEveryMs ? setInterval(() => relay.runDue().catch((e) => console.error('[crm-connector] retry pass failed', e)), retryEveryMs) : null;
   timer?.unref();
   return {
     relay, store, url: `http://${host}:${server.address().port}`,

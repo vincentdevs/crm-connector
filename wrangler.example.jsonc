@@ -1,11 +1,11 @@
 // Copy to wrangler.jsonc, create the database with
-//   npx wrangler d1 create lead-relay
+//   npx wrangler d1 create crm-connector
 // paste its id below, set each "env:" secret with  npx wrangler secret put NAME,  then  npx wrangler deploy
 {
-  "name": "lead-relay",
+  "name": "crm-connector",
   "main": "src/runtime/worker.js",
   "compatibility_date": "2025-09-01",
-  "d1_databases": [{ "binding": "DB", "database_name": "lead-relay", "database_id": "REPLACE_WITH_D1_ID" }],
+  "d1_databases": [{ "binding": "DB", "database_name": "crm-connector", "database_id": "REPLACE_WITH_D1_ID" }],
   // Retries and the retention purge run every five minutes
   "triggers": { "crons": ["*/5 * * * *"] },
   "vars": {

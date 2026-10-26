@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// lead-relay serve | check | test-crm <name> | test-notify <name> | status | retry [id]
+// crm-connector serve | check | test-crm <name> | test-notify <name> | status | retry [id]
 import fs from 'node:fs';
 import path from 'node:path';
 import { validate } from './config.js';
@@ -17,7 +17,7 @@ const flag = (name, dflt) => {
   return i >= 0 ? args.splice(i, 2)[1] : dflt;
 };
 const configPath = flag('config', process.env.RELAY_CONFIG_PATH || 'relay.config.json');
-const dbPath = flag('db', process.env.RELAY_DB || 'lead-relay.db');
+const dbPath = flag('db', process.env.RELAY_DB || 'crm-connector.db');
 const port = Number(flag('port', process.env.PORT || 8787));
 const host = flag('host', process.env.HOST || '127.0.0.1');
 const [cmd, arg] = args;
@@ -41,8 +41,8 @@ function load() {
 function testLead(cfg) {
   const form = Object.values(cfg.forms)[0];
   return normalize({
-    email: process.env.RELAY_TEST_EMAIL || 'lead-relay-test@example.com', first_name: 'Test', last_name: 'Lead Relay',
-    company: 'Lead Relay test', job_title: 'Tester', message: 'A test sent by lead-relay test-crm. Safe to delete.',
+    email: process.env.RELAY_TEST_EMAIL || 'crm-connector-test@example.com', first_name: 'Test', last_name: 'CRM Connector',
+    company: 'CRM Connector test', job_title: 'Tester', message: 'A test sent by crm-connector test-crm. Safe to delete.',
   }, { ...form, title: `${form.title || form.id} (test)` }, { now: new Date().toISOString() });
 }
 
@@ -57,7 +57,7 @@ async function main() {
     case 'serve': {
       const cfg = load();
       const node = await startNode({ config: cfg, dbPath, port, host, trustProxy: process.env.TRUST_PROXY === '1' });
-      console.log(`lead-relay listening on ${node.url}  (forms: ${Object.keys(cfg.forms).map((f) => `/f/${f}`).join(', ')})`);
+      console.log(`crm-connector listening on ${node.url}  (forms: ${Object.keys(cfg.forms).map((f) => `/f/${f}`).join(', ')})`);
       const stop = async () => { await node.close(); process.exit(0); };
       process.on('SIGINT', stop);
       process.on('SIGTERM', stop);
@@ -69,7 +69,7 @@ async function main() {
       const { mod, opts } = resolveAdapter(cfg.crms[arg]);
       const lead = testLead(cfg);
       const state = {};
-      const r = await mod.deliver(lead, opts, { state, cache: {}, save: async () => {}, submissionId: 'test-' + Date.now(), noteTitle: `Test from lead-relay (${lead.form_title})` });
+      const r = await mod.deliver(lead, opts, { state, cache: {}, save: async () => {}, submissionId: 'test-' + Date.now(), noteTitle: `Test from crm-connector (${lead.form_title})` });
       console.log(`${arg}: ${r.action}, ${r.ref}. Look for ${lead.email} in the CRM and delete it when done.`);
       return;
     }
@@ -79,7 +79,7 @@ async function main() {
       if (!n) throw new Error(`No notify named "${arg}". Defined: ${Object.keys(cfg.notify || {}).join(', ')}`);
       const lead = testLead(cfg);
       const { subject, text } = compose(lead, n, [{ target: 'example', status: 'done', action: 'created', ref: 'test' }], 'test-' + Date.now());
-      const via = await send(n, { subject: `[test] ${subject}`, text, replyTo: lead.email, messageId: `test-${Date.now()}@lead-relay` }, { openSocket, fetch, log: console.log });
+      const via = await send(n, { subject: `[test] ${subject}`, text, replyTo: lead.email, messageId: `test-${Date.now()}@crm-connector` }, { openSocket, fetch, log: console.log });
       console.log(`Sent to ${[].concat(n.to).join(', ')} via ${via}.`);
       return;
     }
@@ -106,16 +106,16 @@ async function main() {
       return;
     }
     default:
-      console.log(`lead-relay: form submission -> CRM -> email notification
+      console.log(`crm-connector: form submission -> CRM -> email notification
 
-  lead-relay check                 validate the config and list the forms
-  lead-relay serve                 run the relay (default http://127.0.0.1:8787)
-  lead-relay test-crm <name>       push one test lead to a CRM from the config
-  lead-relay test-notify <name>    send one test notification email
-  lead-relay status                counts per target and the last 10 submissions
-  lead-relay retry [id]            run due retries now, or requeue one submission
+  crm-connector check                 validate the config and list the forms
+  crm-connector serve                 run the relay (default http://127.0.0.1:8787)
+  crm-connector test-crm <name>       push one test lead to a CRM from the config
+  crm-connector test-notify <name>    send one test notification email
+  crm-connector status                counts per target and the last 10 submissions
+  crm-connector retry [id]            run due retries now, or requeue one submission
 
-Options: --config relay.config.json  --db lead-relay.db  --port 8787  --host 127.0.0.1`);
+Options: --config relay.config.json  --db crm-connector.db  --port 8787  --host 127.0.0.1`);
   }
 }
 

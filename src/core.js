@@ -26,7 +26,7 @@ async function sha256(text) {
 export function createRelay({ config, store, runtime }) {
   const rt = { fetch: globalThis.fetch.bind(globalThis), log: console.log, now: Date.now, defer: (p) => p.catch(() => {}), ...runtime };
   const cache = rt.cache || {}; // per-process cache, e.g. a Salesforce access token
-  const log = (msg) => rt.log(`[lead-relay] ${msg}`);
+  const log = (msg) => rt.log(`[crm-connector] ${msg}`);
 
   // ---------------------------------------------------------------- HTTP
 
@@ -115,7 +115,7 @@ export function createRelay({ config, store, runtime }) {
       return { status: 422, body: { ok: false, error: 'consent', fields: [form.consent.field], message: form.consent.message || 'Please give your consent to continue.' } };
     }
 
-    const ipHash = meta.ip ? await sha256(`${config.salt || 'lead-relay'}:${meta.ip}`) : null;
+    const ipHash = meta.ip ? await sha256(`${config.salt || 'crm-connector'}:${meta.ip}`) : null;
     if (ipHash && config.rateLimitPerHour) {
       const n = await store.countRecent(ipHash, now - 3600_000);
       if (n >= config.rateLimitPerHour) return { status: 429, body: { ok: false, error: 'rate', message: 'Too many submissions from this connection. Please try again later.' } };
@@ -159,7 +159,7 @@ export function createRelay({ config, store, runtime }) {
           .map((r) => ({ target: r.target.slice(4), status: r.status, ...(r.result || {}), error: r.error, permanent: r.status === 'dead' }));
         const n = config.notify[form.notify];
         const { subject, text } = compose(lead, n, rows, id);
-        result = { via: await send(n, { subject, text, replyTo: lead.email, messageId: `${id}@lead-relay` }, rt) };
+        result = { via: await send(n, { subject, text, replyTo: lead.email, messageId: `${id}@crm-connector` }, rt) };
       } else {
         const name = target.slice(4);
         const { mod, opts } = resolveAdapter(config.crms[name]);
@@ -189,8 +189,8 @@ export function createRelay({ config, store, runtime }) {
     try {
       await send(n, {
         subject: oneLine(`Lead not added to ${target.slice(4)}: ${lead.email}`),
-        text: `The relay gave up adding this lead to ${target.slice(4)}.\n\nError: ${error}\n\nSubmission ${id}, form "${lead.form_title}", email ${lead.email}.\nAdd it by hand, or fix the cause and run: lead-relay retry ${id}`,
-        replyTo: lead.email, messageId: `${id}.alert.${target.slice(4)}@lead-relay`,
+        text: `The relay gave up adding this lead to ${target.slice(4)}.\n\nError: ${error}\n\nSubmission ${id}, form "${lead.form_title}", email ${lead.email}.\nAdd it by hand, or fix the cause and run: crm-connector retry ${id}`,
+        replyTo: lead.email, messageId: `${id}.alert.${target.slice(4)}@crm-connector`,
       }, rt);
     } catch (e) {
       log(`${id}: the alert email failed too: ${e.message}`);

@@ -1,4 +1,4 @@
-// The browser snippet served at /embed.js. Add data-lead-relay to any <form> whose action points at
+// The browser snippet served at /embed.js. Add data-crm-connector to any <form> whose action points at
 // the relay, and it posts as JSON, stays on the page and shows the result. Without JavaScript the
 // same form still works as a plain POST, which the relay answers with a redirect.
 export const EMBED = `(() => {
@@ -39,11 +39,11 @@ export const EMBED = `(() => {
         const res = await fetch(f.action, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(data) });
         const body = await res.json().catch(() => ({}));
         if (!res.ok || !body.ok) throw new Error(body.message || 'The form could not be sent. Please try again.');
-        f.dispatchEvent(new CustomEvent('lead-relay:sent', { detail: body, bubbles: true }));
+        f.dispatchEvent(new CustomEvent('crm-connector:sent', { detail: body, bubbles: true }));
         if (f.dataset.redirect) { location.href = f.dataset.redirect; return; }
         const done = document.createElement('p');
         done.setAttribute('role', 'status');
-        done.className = 'lead-relay-success';
+        done.className = 'crm-connector-success';
         done.textContent = f.dataset.success || 'Thank you, your message has been sent.';
         f.replaceWith(done);
       } catch (x) {
@@ -56,7 +56,7 @@ export const EMBED = `(() => {
       }
     });
   };
-  const scan = () => document.querySelectorAll('form[data-lead-relay]').forEach(setup);
+  const scan = () => document.querySelectorAll('form[data-crm-connector]').forEach(setup);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan); else scan();
   new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true });
 })();
