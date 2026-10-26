@@ -1,0 +1,40 @@
+{
+  "salt": "env:RELAY_SALT",
+  "adminToken": "env:RELAY_ADMIN_TOKEN",
+  "retentionDays": 30,
+  "maxAttempts": 8,
+  "rateLimitPerHour": 20,
+
+  "forms": {
+    "contact": {
+      "title": "Contact form",
+      "allowedOrigins": ["https://www.example.com", "https://example.com"],
+      "required": ["email", "first_name"],
+      "consent": { "required": false, "text": "I agree to receive occasional emails. I can unsubscribe at any time." },
+      "successUrl": "https://www.example.com/thanks",
+      "crm": ["hubspot"],
+      "notify": "sales"
+    }
+  },
+
+  "crms": {
+    "hubspot":    { "type": "hubspot", "token": "env:HUBSPOT_TOKEN" },
+    "pipedrive":  { "type": "pipedrive", "token": "env:PIPEDRIVE_TOKEN", "baseUrl": "https://yourcompany.pipedrive.com/api" },
+    "salesforce": { "type": "salesforce", "instanceUrl": "https://yourcompany.my.salesforce.com", "clientId": "env:SF_CLIENT_ID", "clientSecret": "env:SF_CLIENT_SECRET" },
+    "attio":      { "type": "attio", "token": "env:ATTIO_TOKEN" },
+    "dandirock":  { "type": "dandirock", "baseUrl": "http://127.0.0.1:8050", "apiKey": "env:DANDIROCK_API_KEY", "apiSecret": "env:DANDIROCK_API_SECRET" },
+    "frappe-crm": { "type": "frappe-crm", "baseUrl": "https://crm.example.com", "apiKey": "env:FRAPPE_API_KEY", "apiSecret": "env:FRAPPE_API_SECRET" },
+    "zapier":     { "type": "webhook", "url": "env:ZAPIER_HOOK_URL", "secret": "env:WEBHOOK_SECRET" }
+  },
+
+  "notify": {
+    "sales": {
+      "transport": "smtp",
+      "to": ["sales@example.com"],
+      "from": "forms@example.com",
+      "fromName": "Website",
+      "subject": "New {form_title} from {name}",
+      "smtp": { "host": "mail.example.com", "port": 587, "user": "env:SMTP_USER", "pass": "env:SMTP_PASS" }
+    }
+  }
+}

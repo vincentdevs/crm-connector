@@ -1,0 +1,33 @@
+// Copy to wrangler.jsonc, create the database with
+//   npx wrangler d1 create lead-relay
+// paste its id below, set each "env:" secret with  npx wrangler secret put NAME,  then  npx wrangler deploy
+{
+  "name": "lead-relay",
+  "main": "src/runtime/worker.js",
+  "compatibility_date": "2025-09-01",
+  "d1_databases": [{ "binding": "DB", "database_name": "lead-relay", "database_id": "REPLACE_WITH_D1_ID" }],
+  // Retries and the retention purge run every five minutes
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "vars": {
+    // The same JSON as relay.config.json; secrets stay as "env:NAME" and live in Worker secrets
+    "RELAY_CONFIG": {
+      "salt": "env:RELAY_SALT",
+      "adminToken": "env:RELAY_ADMIN_TOKEN",
+      "forms": {
+        "contact": {
+          "title": "Contact form",
+          "allowedOrigins": ["https://www.example.com"],
+          "crm": ["hubspot"],
+          "notify": "sales"
+        }
+      },
+      "crms": { "hubspot": { "type": "hubspot", "token": "env:HUBSPOT_TOKEN" } },
+      "notify": {
+        "sales": {
+          "transport": "smtp", "to": ["sales@example.com"], "from": "forms@example.com", "fromName": "Website",
+          "smtp": { "host": "mail.example.com", "port": 465, "user": "env:SMTP_USER", "pass": "env:SMTP_PASS" }
+        }
+      }
+    }
+  }
+}

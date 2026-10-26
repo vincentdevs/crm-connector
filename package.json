@@ -1,0 +1,14 @@
+{
+  "name": "lead-relay",
+  "version": "0.1.0",
+  "description": "Form submission to CRM to email notification, with an outbox that retries. Runs on Node or Cloudflare Workers, no dependencies.",
+  "type": "module",
+  "private": true,
+  "bin": { "lead-relay": "src/cli.js" },
+  "engines": { "node": ">=22.5" },
+  "scripts": {
+    "start": "node src/cli.js serve",
+    "check": "node src/cli.js check",
+    "test": "node --test --test-concurrency=1 test/*.test.js"
+  }
+}
