@@ -4,6 +4,19 @@ CRM Connector sits between a website form and the tools that handle the lead. A 
 
 It is for anyone who wants form leads to reach a CRM without paying for a form SaaS, and without losing a lead when the CRM API is down for an hour.
 
+For a step-by-step explanation of what happens to a submission, why each step is built that way and how failures are handled, read [How CRM Connector works](docs/HOW_IT_WORKS.md).
+
+## Try it in two minutes
+
+```bash
+git clone https://github.com/vincentdevs/crm-connector.git && cd crm-connector
+npm test                                          # 16 tests against simulated CRMs, no account needed
+cp relay.config.example.json relay.config.json    # then keep only the forms and CRMs you use
+node src/cli.js check
+```
+
+Requires Node 22.5 or newer. There is nothing to install.
+
 ## How a submission travels
 
 1. **Check.** The relay refuses posts from sites not listed in `allowedOrigins`, bodies over 32 KB, a missing or malformed email, missing required fields and missing consent when the form requires it. Bots that fill the hidden honeypot field, or post less than 1.5 seconds after the page loaded, get the same success answer as a person, and nothing is stored. Each connection is limited to 20 submissions an hour by default.
